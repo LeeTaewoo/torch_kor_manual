@@ -1,6 +1,6 @@
 # ZBS-torch
 
-지비에스-토치(ZBS-torch)는 토치7과 함께 동작하기 위한 제로브레인(ZeroBrane) 스튜디오의 한 포크(fork:기트허브에서 원본 프로젝트의 소스 코드 복사본을 내 원격 저장소로 내려받는 행위 또는 그 행위의 결과물)입니다.
+[지비에스-토치(ZBS-torch)](https://github.com/soumith/zbs-torch)는 토치7과 함께 동작하기 위한 제로브레인(ZeroBrane) 스튜디오의 한 포크(fork:기트허브에서 원본 프로젝트의 소스 코드 복사본을 내 원격 저장소로 내려받는 행위 또는 그 행위의 결과물)입니다.
 
 제로브레인 스튜디오의 개요는 다음 문서를 참고하십시오. [README-zbs](https://github.com/soumith/zbs-torch/blob/master/README-zbs.md)
 
