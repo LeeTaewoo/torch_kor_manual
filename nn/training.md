@@ -1,5 +1,5 @@
 <a name="nn.traningneuralnet.dok"></a>
-# Training a neural network #
+# 신경망 훈련하기 #
 
 Training a neural network is easy with a [simple `for` loop](#nn.DoItYourself).
 While doing your own loop provides great flexibility, you might
