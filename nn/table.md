@@ -750,14 +750,18 @@ used internally to do so is recursive.
 
 `module` = `NarrowTable(offset [, length])`
 
-Creates a module that takes a `table` as input and outputs the subtable 
-starting at index `offset` having `length` elements (defaults to 1 element).
-The elements can be either a `table` or a [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor).
+`테이블` 하나를 입력으로 받고 (`length`개 요소들을 갖고 인덱스 `offset`에서 시작하는) 
+하위테이블을 출력하는 모듈 하나를 만듭니다. `length`의 기본값은 `1`입니다.
+요소들은 `테이블` 하나 또는 [`텐서`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor)
+하나일 수 있습니다.
 
+하위테이블에 포함되지 않은 요소들의 기울기들은 같은 차원의 `0`으로 초기화된 `텐서`들입니다.
+[~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]
 The gradients of the elements not included in the subtable are zeroed `Tensor`s of the same size. 
-This is true regardless of the dept of the encapsulated `Tensor` as the function used internally to do so is recursive.
+This is true regardless of the dept of the encapsulated `Tensor` as the function used internally 
+to do so is recursive.
 
-Example:
+예:
 ```lua
 > input = {torch.randn(2, 3), torch.randn(2, 1), torch.randn(1, 2)}
 > =nn.NarrowTable(2,2):forward(input)
@@ -790,17 +794,23 @@ Example:
 
 `module` = `FlattenTable()`
 
-Creates a module that takes an arbitrarily deep `table` of `Tensor`s (potentially nested) as input and outputs a `table` of `Tensor`s, where the output `Tensor` in index `i` is the `Tensor` with post-order DFS index `i` in the input `table`.
+입력으로 (잠재적으로 중첩된) `텐서`들로 구성된 임의의 깊은 `테이블` 하나를 받고,
+`텐서`들로 구성된 `테이블` 하나를 출력하는 모듈 하나를 만듭니다.
+여기서 인덱스 `i`에 있는 출력 `텐서`는 
+입력 `테이블`에서 후위 깊이 우선 탐색(postorder depth first search) 인덱스 `i`를 가진
+`텐서`입니다.
 
-This module is particularly useful in combination with nn.Identity() to create networks that can append to their input `table`.
+이 모듈은 
+그것들의 입력 `테이블`을 덧붙일 수 있는 네트워크를 만들기 위해 `nn.Identity()`와 결합할 때, 
+특히 유용합니다.
 
-Example:
+예:
 ```lua
 x = {torch.rand(1), {torch.rand(2), {torch.rand(3)}}, torch.rand(4)}
 print(x)
 print(nn.FlattenTable():forward(x))
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
 {
   1 : DoubleTensor - size: 1
@@ -825,9 +835,12 @@ gives the output:
 <a name="nn.PairwiseDistance"></a>
 ## PairwiseDistance ##
 
-`module` = `PairwiseDistance(p)` creates a module that takes a `table` of two vectors as input and outputs the distance between them using the `p`-norm.
+`module` = `PairwiseDistance(p)`는 
+두 벡터로 구성된 `테이블` 하나를 입력으로 받아서,
+`p`-놈을 사용하여 그 두 벡터 사이 거리를 출력하는
+한 모듈을 만듭니다.
 
-Example:
+예:
 ```lua
 mlp_l1 = nn.PairwiseDistance(1)
 mlp_l2 = nn.PairwiseDistance(2)
@@ -836,7 +849,7 @@ y = torch.Tensor({4, 5, 6})
 print(mlp_l1:forward({x, y}))
 print(mlp_l2:forward({x, y}))
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
  9
 [torch.Tensor of dimension 1]
@@ -845,9 +858,9 @@ gives the output:
 [torch.Tensor of dimension 1]
 ```
 
-A more complicated example:
+더 복잡한 예:
 ```lua
--- imagine we have one network we are interested in, it is called "p1_mlp"
+-- 우리가 관심있는 네트워크가 하나 있다고 합시다. 그 네트워크를 "p1_mlp"라 부르겠습니다.
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5, 2))
 
 -- But we want to push examples towards or away from each other
@@ -1090,9 +1103,12 @@ end
 
 `module` = `CriterionTable(criterion)`
 
-Creates a module that wraps a Criterion module so that it can accept a `table` of inputs. Typically the `table` would contain two elements: the input and output `x` and `y` that the Criterion compares.
+Creates a module 
+that wraps a Criterion module so that it can accept a `table` of inputs. 
+Typically the `table` would contain two elements: 
+the input and output `x` and `y` that the Criterion compares.
 
-Example:
+예:
 ```lua
 mlp = nn.CriterionTable(nn.MSECriterion())
 x = torch.randn(5)
@@ -1100,33 +1116,33 @@ y = torch.randn(5)
 print(mlp:forward{x, x})
 print(mlp:forward{x, y})
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
 0
 1.9028918413199
 ```
 
-Here is a more complex example of embedding the criterion into a network:
+여기 그 기준을 네트워크로 임베딩하는 더 복잡한 예제가 있습니다:
 ```lua
 
 function table.print(t)
  for i, k in pairs(t) do print(i, k); end
 end
 
-mlp = nn.Sequential();                          -- Create an mlp that takes input
-  main_mlp = nn.Sequential();		      -- and output using ParallelTable
+mlp = nn.Sequential();                           -- 입력을 받는 한 다층 퍼셉트론(MLP)을 만듭니다.
+  main_mlp = nn.Sequential();		                  -- ParallelTable을 사용하여 출력합니다.
   main_mlp:add(nn.Linear(5, 4))
   main_mlp:add(nn.Linear(4, 3))
  cmlp = nn.ParallelTable();
  cmlp:add(main_mlp)
  cmlp:add(nn.Identity())
 mlp:add(cmlp)
-mlp:add(nn.CriterionTable(nn.MSECriterion())) -- Apply the Criterion
+mlp:add(nn.CriterionTable(nn.MSECriterion()))    -- 오차 판정 기준(criterion)을 적용합니다.
 
-for i = 1, 20 do                                 -- Train for a few iterations
+for i = 1, 20 do                                 -- 적은 수의 반복으로 훈련시킵니다.
  x = torch.ones(5);
  y = torch.Tensor(3); y:copy(x:narrow(1, 1, 3))
- err = mlp:forward{x, y}                         -- Pass in both input and output
+ err = mlp:forward{x, y}                         -- 입력과 출력 모두를 전달합니다.
  print(err)
 
  mlp:zeroGradParameters();
@@ -1138,7 +1154,7 @@ end
 <a name="nn.CAddTable"></a>
 ## CAddTable ##
 
-Takes a `table` of `Tensor`s and outputs summation of all `Tensor`s.
+`텐서`들로 구성된 `테이블` 하나를 입력으로 받아 모든 `텐서`들의 합을 출력합니다.
 
 ```lua
 ii = {torch.ones(5), torch.ones(5)*2, torch.ones(5)*3}
@@ -1180,8 +1196,7 @@ m = nn.CAddTable()
 <a name="nn.CSubTable"></a>
 ## CSubTable ##
 
-Takes a `table` with two `Tensor` and returns the component-wise
-subtraction between them.
+두 `텐서`를 가진 `테이블` 하나를 입력으로 받아 그 두 `텐서` 사이 요소별 뺄셈 결과를 리턴합니다.
 
 ```lua
 m = nn.CSubTable()
@@ -1197,7 +1212,7 @@ m = nn.CSubTable()
 <a name="nn.CMulTable"></a>
 ## CMulTable ##
 
-Takes a `table` of `Tensor`s and outputs the multiplication of all of them.
+`텐서`들로 구성된 `테이블` 하나를 입력으로 받아 그 `텐서`들의 요소별 곱을 출력합니다.
 
 ```lua
 ii = {torch.ones(5)*2, torch.ones(5)*3, torch.ones(5)*4}
@@ -1215,8 +1230,7 @@ m = nn.CMulTable()
 <a name="nn.CDivTable"></a>
 ## CDivTable ##
 
-Takes a `table` with two `Tensor` and returns the component-wise
-division between them.
+두 `텐서`를 가진 `테이블` 하나를 입력으로 받아 그것들의 요소별 나눗셈 결과를 리턴합니다.
 
 ```lua
 m = nn.CDivTable()
