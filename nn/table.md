@@ -5,12 +5,12 @@
 이는 우리가 매우 풍부한 구조들을 만들 수 있게 합니다:
 
   * `테이블` 컨테이너 모듈들은 하위 모듈들을 캡슐화합니다:
-    * [`ConcatTable`](#nn.ConcatTable): applies each member module to the same input     [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) and outputs a `table`;
-    * [`ParallelTable`](#nn.ParallelTable): applies the `i`-th member module to the `i`-th input and outputs a `table`;
-  * 테이블 변화 모듈들은 `테이블`과 `텐서` 또는 `테이블` 사이를 전환시킵니다:
-    * [`SplitTable`](#nn.SplitTable): splits a `Tensor` into a `table` of `Tensor`s;
-    * [`JoinTable`](#nn.JoinTable): joins a `table` of `Tensor`s into a `Tensor`;
-    * [`MixtureTable`](#nn.MixtureTable): mixture of experts weighted by a gater;
+    * [`ConcatTable`](#nn.ConcatTable): 각 멤버 모듈을 같은 입력 [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor)에 적용하고, `테이블` 하나를 출력합니다 ;
+    * [`ParallelTable`](#nn.ParallelTable): `i` 번째 멤버 모듈을 `i` 번째 입력에 적용하고, `테이블` 하나를 출력합니다 ;
+  * 테이블 전환(conversion) 모듈들은 `테이블`과 `텐서` 또는 `테이블` 사이를 전환시킵니다:
+    * [`SplitTable`](#nn.SplitTable): `텐서` 하나를 `텐서`들로 구성된 `테이블` 하나로 나눕니다 ;
+    * [`JoinTable`](#nn.JoinTable): `텐서`들로 구성된 `테이블` 하나를 `텐서` 하나로 합칩니다 ;
+    * [`MixtureTable`](#nn.MixtureTable): 전문가들의 혼합물(mixture of experts)은 여러 개의 인공 신경망(전문가)들을 모아 하나의 과제를 수행하는 전략을 뜻한다. 게이터는 ~이다. `MixtureTable`은 게이터(gater)에 의해 가중된 전문가들의 혼합물이다 ;
     * [`SelectTable`](#nn.SelectTable): select one element from a `table`;
     * [`NarrowTable`](#nn.NarrowTable): select a slice of elements from a `table`;
     * [`FlattenTable`](#nn.FlattenTable): flattens a nested `table` hierarchy;
