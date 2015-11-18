@@ -10,30 +10,31 @@
   * 테이블 전환(conversion) 모듈들은 `테이블`과 `텐서` 또는 `테이블` 사이를 전환시킵니다:
     * [`SplitTable`](#nn.SplitTable): `텐서` 하나를 `텐서`들로 구성된 `테이블` 하나로 나눕니다 ;
     * [`JoinTable`](#nn.JoinTable): `텐서`들로 구성된 `테이블` 하나를 `텐서` 하나로 합칩니다 ;
-    * [`MixtureTable`](#nn.MixtureTable): 전문가들의 혼합물(mixture of experts)은 여러 개의 인공 신경망(전문가)들을 모아 하나의 과제를 수행하는 전략을 뜻한다. 게이터는 ~이다. `MixtureTable`은 게이터(gater)에 의해 가중된 전문가들의 혼합물이다 ;
-    * [`SelectTable`](#nn.SelectTable): select one element from a `table`;
-    * [`NarrowTable`](#nn.NarrowTable): select a slice of elements from a `table`;
-    * [`FlattenTable`](#nn.FlattenTable): flattens a nested `table` hierarchy;
-  * 입력 `텐서`들의 (`table`) 쌍에서, 페어 모듈들은 거리 또는 유사도 같은 척도를 계산합니다:
-    * [`PairwiseDistance`](#nn.PairwiseDistance): outputs the `p`-norm. distance between inputs;
-    * [`DotProduct`](#nn.DotProduct): outputs the dot product (similarity) between inputs;
-    * [`CosineDistance`](#nn.CosineDistance): outputs the cosine distance between inputs;
+    * [`MixtureTable`](#nn.MixtureTable): 전문가들의 혼합물(mixture of experts)은 여러 인공 신경망(전문가)의 예측들을 게이터(gater) 하나로 모아 한 과제를 수행하는 전략입니다. `MixtureTable`은 게이터(gater)에 의해 가중된 전문가들의 혼합물입니다 ;
+    * [`SelectTable`](#nn.SelectTable): `테이블`에서 요소 하나를 선택합니다 ;
+    * [`NarrowTable`](#nn.NarrowTable): `테이블`에서 슬라이스 하나를 선택합니다 ;
+    * [`FlattenTable`](#nn.FlattenTable): 중첩된 `테이블` 구조를 평평하게 만듭니다(flatten) ;
+  * 입력 `텐서`들의 (`테이블`) 쌍에서, 페어 모듈들은 거리 또는 유사도 같은 척도를 계산합니다:
+    * [`PairwiseDistance`](#nn.PairwiseDistance): `p`-놈을 출력합니다. 입력들 사이 거리 ;
+    * [`DotProduct`](#nn.DotProduct): 입력들 사이 점곱(dot product, 유사도)을 출력합니다 ;
+    * [`CosineDistance`](#nn.CosineDistance): 입력들 사이 코사인 거리를 출력합니다 ;
   * CMath 모듈들ㅇㄴ 요소별 연산들을 `텐서`들의 `테이블`에 수행합니다:
-    * [`CAddTable`](#nn.CAddTable): addition of input `Tensor`s;
-    * [`CSubTable`](#nn.CSubTable): substraction of input `Tensor`s;
-    * [`CMulTable`](#nn.CMulTable): multiplication of input `Tensor`s;
-    * [`CDivTable`](#nn.CDivTable): division of input `Tensor`s;
-  * 오차 판정 기준들의 `테이블`:
-    * [`CriterionTable`](#nn.CriterionTable): wraps a [Criterion](criterion.md#nn.Criterion) so that it can accept a `table` of inputs.
+    * [`CAddTable`](#nn.CAddTable): 입력 `텐서`들의 덧셈;
+    * [`CSubTable`](#nn.CSubTable): 입력 `텐서`들의 뺄셈;
+    * [`CMulTable`](#nn.CMulTable): 입력 `텐서`들의 곱셈;
+    * [`CDivTable`](#nn.CDivTable): 입력 `텐서`들의 나눗셈;
+  * 오차 판정 기준(criterion)들의 `테이블`:
+    * [`CriterionTable`](#nn.CriterionTable): 입력들로 구성된 `테이블`을 받을 수 있도록 한 [Criterion](criterion.md#nn.Criterion)의 코드를 수정합니다.
 
-`table`-based modules work by supporting `forward()` and `backward()` methods that can accept `table`s as inputs.
-It turns out that the usual [`Sequential`](containers.md#nn.Sequential) module can do this, so all that is needed is other child modules that take advantage of such `table`s.
+`테이블` 기반 모듈들에서 `forward()`와 `backward()` 메소드는 입력들로 `테이블`들을 받을 수 있습니다.
+보통 [`Sequential`](containers.md#nn.Sequential) 모듈도 이것을 할 수 있습니다.
+그래서 우리에게 필요한 모든 것은 그런 `테이블`들을 이용하는 다른 자식 모듈들입니다 
 
 ```lua
 mlp = nn.Sequential()
 t = {x, y, z}
 pred = mlp:forward(t)
-pred = mlp:forward{x, y, z}      -- This is equivalent to the line before
+pred = mlp:forward{x, y, z}      -- 이것은 바로 앞 줄과 같습니다
 ```
 
 <a name="nn.ConcatTable"></a>
@@ -43,19 +44,21 @@ pred = mlp:forward{x, y, z}      -- This is equivalent to the line before
 module = nn.ConcatTable()
 ```
 
-`ConcatTable` is a container module that applies each member module to the same input [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) or `table`.
+`ConcatTable`은 각 멤버 모듈에 같은 입력
+[`텐서`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) 또는 `테이블`을 
+적용하는 컨테이너 모듈입니다.
 
 ```
-                  +-----------+
-             +----> {member1, |
-+-------+    |    |           |
-| input +----+---->  member2, |
-+-------+    |    |           |
-   or        +---->  member3} |
- {input}          +-----------+
+                  +----------+
+             +----> {멤버1,  |
++-------+    |    |          |
+| 입력  +----+---->  멤버2,  |
++-------+    |    |          |
+  또는       +---->  멤버3}  |
+ {입력}           +----------+
 ```
 
-### Example 1
+### 예 1
 
 ```lua
 mlp = nn.ConcatTable()
@@ -66,7 +69,7 @@ pred = mlp:forward(torch.randn(5))
 for i, k in ipairs(pred) do print(i, k) end
 ```
 
-which gives the output:
+는 다음을 출력합니다:
 
 ```lua
 1
@@ -81,7 +84,7 @@ which gives the output:
 [torch.Tensor of dimension 3]
 ```
 
-### Example 2
+### 예 2
 
 ```lua
 mlp = nn.ConcatTable()
@@ -92,7 +95,7 @@ pred = mlp:forward{torch.randn(2), {torch.randn(3)}}
 print(pred)
 ```
 
-which gives the output (using [th](https://github.com/torch/trepl)):
+는 다음을 출력합니다 ([th](https://github.com/torch/trepl)를 사용하여):
 
 ```lua
 {
@@ -123,19 +126,22 @@ which gives the output (using [th](https://github.com/torch/trepl)):
 module = nn.ParallelTable()
 ```
 
-`ParallelTable` is a container module that, in its `forward()` method, applies the `i`-th member module to the `i`-th input, and outputs a `table` of the set of outputs.
+`ParallelTable`은 그것의 `forward()` 메소드에서 `i` 번째 멤버 모듈을 `i` 번째 입력으로 
+적용하고, 출력들의 집합으로 구성된 `테이블` 하나를 출력하는 
+컨테이너 모듈입니다.
+
 
 ```
-+----------+         +-----------+
-| {input1, +---------> {member1, |
-|          |         |           |
-|  input2, +--------->  member2, |
-|          |         |           |
-|  input3} +--------->  member3} |
-+----------+         +-----------+
++----------+         +----------+
+| {입력1,  +---------> {멤버1,  |
+|          |         |          |
+|  입력2,  +--------->  멤버2,  |
+|          |         |          |
+|  입력3}  +--------->  멤버3}  |
++----------+         +----------+
 ```
 
-### Example
+### 예
 
 ```lua
 mlp = nn.ParallelTable()
@@ -149,7 +155,7 @@ pred = mlp:forward{x, y}
 for i, k in pairs(pred) do print(i, k) end
 ```
 
-which gives the output:
+는 다음을 출력합니다:
 
 ```lua
 1
@@ -172,23 +178,26 @@ which gives the output:
 module = SplitTable(dimension, nInputDims)
 ```
 
-Creates a module that takes a [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) as input and outputs several `table`s, splitting the `Tensor` along the specified `dimension`.
-In the diagram below, `dimension` is equal to `1`.
+[`텐서`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) 하나를 입력으로 받고
+여러 개의 `테이블`들을 출력하는 모듈 하나를 만듭니다.
+그 출력하는 `테이블`들은 `텐서`를 특정된 차원 `dimension`을 따라 나눈 것입니다.
+아래 다이어그램에서, `dimension`은 `1`로 설정되었습니다.
 
 ```
-    +----------+         +-----------+
-    | input[1] +---------> {member1, |
-  +----------+-+         |           |
-  | input[2] +----------->  member2, |
-+----------+-+           |           |
-| input[3] +------------->  member3} |
-+----------+             +-----------+
+    +----------+         +----------+
+    | 입력[1]  +---------> {멤버1,  |
+  +----------+-+         |          |
+  | 입력[2]  +----------->  멤버2,  |
++----------+-+           |          |
+| 입력[3]  +------------->  멤버3}  |
++----------+             +----------+
 ```
 
-The optional parameter `nInputDims` allows to specify the number of dimensions that this module will receive.
-This makes it possible to forward both minibatch and non-minibatch `Tensor`s through the same module.
+선택적 파라미터 `nInputDims`는 이 모듈이 받을 차원 구성을 특정할 수 있게 합니다.
+이것은 미니배치와 비-미니배치 `텐서` 모두를 같은 모듈로 `forward` 할 수 있게 합니다.
 
-### Example 1
+
+### 예 1
 
 ```lua
 mlp = nn.SplitTable(2)
@@ -197,7 +206,7 @@ pred = mlp:forward(x)
 for i, k in ipairs(pred) do print(i, k) end
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```lua
 1
@@ -222,7 +231,7 @@ gives the output:
 [torch.Tensor of dimension 4]
 ```
 
-### Example 2
+### 예 2
 
 ```lua
 mlp = nn.SplitTable(1)
@@ -230,7 +239,7 @@ pred = mlp:forward(torch.randn(4, 3))
 for i, k in ipairs(pred) do print(i, k) end
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```lua
 1
@@ -258,7 +267,7 @@ gives the output:
 [torch.Tensor of dimension 3]
 ```
 
-### Example 3
+### 예 3
 
 ```lua
 mlp = nn.SplitTable(1, 2)
@@ -268,7 +277,7 @@ pred = mlp:forward(torch.randn(4, 3))
 for i, k in ipairs(pred) do print(i, k) end
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```lua
 1
@@ -317,9 +326,10 @@ gives the output:
 [torch.DoubleTensor of dimension 3]
 ```
 
-The module also supports indexing from the end using negative dimensions. This allows to use this module when the number of dimensions of the input is unknown.
+또한, 이 모듈은 네거티브 차원들을 사용하여 끝에서부터의 인덱싱도 지원합니다.
+이것은 입력의 차원 구성을 모르더라도 그 모듈을 사용할 수 있게 합니다.
 
-### Example
+### 예
 
 ```lua
 m = nn.SplitTable(-2)
@@ -329,7 +339,7 @@ out = m:forward(torch.randn(1, 3, 2))
 for i, k in ipairs(out) do print(i, k) end
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```
 1
@@ -364,25 +374,25 @@ gives the output:
 [torch.DoubleTensor of size 1x2]
 ```
 
-### A more complicated example
+### 더 복잡한 예
 
 ```lua
-mlp = nn.Sequential()       -- Create a network that takes a Tensor as input
+mlp = nn.Sequential()       -- 텐서 하나를 입력으로 받는 네트워크 하나를 만듭니다.
 mlp:add(nn.SplitTable(2))
-c = nn.ParallelTable()      -- The two Tensor slices go through two different Linear
-c:add(nn.Linear(10, 3))     -- Layers in Parallel
+c = nn.ParallelTable()      -- 두 텐서 슬라이스가 두 개의 다른 선형 층으로 병렬로 들어갑니다.
+c:add(nn.Linear(10, 3))
 c:add(nn.Linear(10, 7))
-mlp:add(c)                  -- Outputing a table with 2 elements
-p = nn.ParallelTable()      -- These tables go through two more linear layers separately
+mlp:add(c)                  -- 두 요소를 가진 테이블을 출력합니다.
+p = nn.ParallelTable()      -- 이 테이블들은 두 개의 추가 선형 층들로 따로따로 들어갑니다.
 p:add(nn.Linear(3, 2))
 p:add(nn.Linear(7, 1))
 mlp:add(p)
-mlp:add(nn.JoinTable(1))    -- Finally, the tables are joined together and output.
+mlp:add(nn.JoinTable(1))    -- 마침내, 테이블이 함께 합쳐지고 출력됩니다.
 
 pred = mlp:forward(torch.randn(10, 2))
 print(pred)
 
-for i = 1, 100 do           -- A few steps of training such a network..
+for i = 1, 100 do           -- 그런 네트워크를 훈련하는 몇 단계...
    x = torch.ones(10, 2)
    y = torch.Tensor(3)
    y:copy(x:select(2, 1, 1):narrow(1, 1, 3))
@@ -407,25 +417,28 @@ end
 module = JoinTable(dimension, nInputDims)
 ```
 
-Creates a module that takes a `table` of `Tensor`s as input and outputs a [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor) by joining them together along dimension `dimension`.
-In the diagram below `dimension` is set to `1`.
+차원 `dimension`을 따라 그것들을 결합함으로써, 
+`텐서`들로 구성된 `테이블` 하나를 입력으로 받고 `텐서` 하나를 출력하는 모듈을 만듭니다.
+아래 다이어그램에서 `dimension`은 `1`로 설정되었습니다.
 
 ```
-+----------+             +-----------+
-| {input1, +-------------> output[1] |
-|          |           +-----------+-+
-|  input2, +-----------> output[2] |
-|          |         +-----------+-+
-|  input3} +---------> output[3] |
-+----------+         +-----------+
++----------+             +----------+
+| {입력1,  +-------------> 출력[1]  |
+|          |           +----------+-+
+|  입력2,  +-----------> 출력[2]  |
+|          |         +----------+-+
+|  입력3}  +---------> 출력[3]  |
++----------+         +----------+
 ```
 
-The optional parameter `nInputDims` allows to specify the number of dimensions that this module will receive. This makes it possible to forward both minibatch and non-minibatch `Tensor`s through the same module.
+선택적 파라미터 `nInputDims`는 이 모듈이 받을 차원 구성을 특정할 수 있게 합니다.
+이것은 미니배치와 비-미니배치 `텐서` 모두를 같은 모듈로 `forward` 할 수 있게 합니다.
 
-### Example 1
+
+### 예 1
 
 ```lua
-x = torch.randn(5, 1)
+
 y = torch.randn(5, 1)
 z = torch.randn(2, 1)
 
@@ -434,7 +447,7 @@ print(nn.JoinTable(2):forward{x, y})
 print(nn.JoinTable(1):forward{x, z})
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```lua
  1.3965
@@ -466,7 +479,7 @@ gives the output:
 [torch.Tensor of dimension 7x1]
 ```
 
-### Example 2
+### 예 2
 
 ```lua
 module = nn.JoinTable(2, 2)
@@ -481,7 +494,7 @@ print(module:forward{x, y})
 print(module:forward{mx, my})
 ```
 
-gives the output:
+는 다음을 출력합니다:
 
 ```lua
  0.4288  1.2002
@@ -501,24 +514,24 @@ gives the output:
 [torch.DoubleTensor of dimension 2x3x2]
 ```
 
-### A more complicated example
+### 더 복잡한 예
 
 ```lua
-mlp = nn.Sequential()         -- Create a network that takes a Tensor as input
-c = nn.ConcatTable()          -- The same Tensor goes through two different Linear
-c:add(nn.Linear(10, 3))       -- Layers in Parallel
+mlp = nn.Sequential()         -- 텐서 하나를 입력으로 받는 네트워크 하나를 만듭니다.
+c = nn.ConcatTable()          -- 그 같은 텐서가 두 개의 다른 선형 층으로 들어갑니다.
+c:add(nn.Linear(10, 3))       
 c:add(nn.Linear(10, 7))
-mlp:add(c)                    -- Outputing a table with 2 elements
-p = nn.ParallelTable()        -- These tables go through two more linear layers
-p:add(nn.Linear(3, 2))        -- separately.
+mlp:add(c)                    -- 두 요소를 가진 테이블 하나를 출력합니다.
+p = nn.ParallelTable()        -- 이 테이블들은 두 개의 추가 선형 층들로 따로따로 들어갑니다.
+p:add(nn.Linear(3, 2))        
 p:add(nn.Linear(7, 1))
 mlp:add(p)
-mlp:add(nn.JoinTable(1))      -- Finally, the tables are joined together and output.
+mlp:add(nn.JoinTable(1))      -- 마침내, 그 테이블들이 결합되어 출력됩니다.
 
 pred = mlp:forward(torch.randn(10))
 print(pred)
 
-for i = 1, 100 do             -- A few steps of training such a network..
+for i = 1, 100 do             -- 그런 네트워크를 훈련하는 몇 단계...
    x = torch.ones(10)
    y = torch.Tensor(3); y:copy(x:narrow(1, 1, 3))
    pred = mlp:forward(x)
@@ -540,26 +553,26 @@ end
 
 `module` = `MixtureTable([dim])`
 
-Creates a module that takes a `table` `{gater, experts}` as input and outputs
-the mixture of `experts` (a `Tensor` or `table` of `Tensor`s) using a
-`gater` `Tensor`. When `dim` is provided, it specifies the dimension of
-the `experts` `Tensor` that will be interpolated (or mixed). Otherwise,
-the `experts` should take the form of a `table` of `Tensor`s. This
-Module works for `experts` of dimension 1D or more, and for a
-1D or 2D `gater`, i.e. for single examples or mini-batches.
+`{게이터, 전문가들}` `테이블` 하나를 입력으로 받아 `게이터` `텐서`를 사용하여 
+`전문가들`의 혼합물을 출력하는 모듈 하나를 만듭니다.
+출력되는 `전문가들`의 혼합물은 `텐서` 하나 또는 `텐서`들로 구성된 테이블 하나입니다.
+[전문가들의 혼합물(mixture of experts)은 여러 인공 신경망(전문가)의 예측들을 게이터(gater) 하나로 모아 한 과제를 수행하는 전략입니다.](http://www.bcs.rochester.edu/people/robbie/jacobslab/cheat_sheet/mixture_experts.pdf)
+인자로 `dim`이 제공되면, `MixtureTable`은 보간될(도는 섞일) `전문가들` `텐서`의 차원을 특정합니다.
+그렇지 않으면, `전문가들`은 `텐서`들로 구성된 `테이블` 하나를 입력으로 받해야 합니다. 
+이 모듈은 1차원 이상의 `전문가들`을 위해, 그리고 1차원 또는 2차원 `게이터` 하나를 위해 동작합니다.
+다시 말해, 단일 예제들 또는 미니배치들을 위해 동작합니다.
 
-Considering an `input = {G, E}` with a single example, then
-the mixture of experts `Tensor` `E` with
-gater `Tensor` `G` has the following form:
+단일 예제 하나를 가진 `input = {G, E}` 하나를 고려하면,
+게이터 `텐서` `G`를 가진 전문가들의 혼합물 `텐서` `E`는 다음과 같은 형식을 가집니다:
 ```lua
 output = G[1]*E[1] + G[2]*E[2] + ... + G[n]*E[n]
 ```
-where `dim = 1`, `n = E:size(dim) = G:size(dim)` and `G:dim() == 1`.
-Note that `E:dim() >= 2`, such that `output:dim() = E:dim() - 1`.
+여기서 `dim = 1`, `n = E:size(dim) = G:size(dim)`, 그리고 `G:dim() == 1`.
+`E:dim() >= 2`임에 유의하십시오, `output:dim() = E:dim() - 1`.
 
-Example 1:
-Using this Module, an arbitrary mixture of `n` 2-layer experts
-by a 2-layer gater could be constructed as follows:
+예 1:
+이 모듈을 사용하여, 2층 게이터를 가진 임의의 `n`개 2층 전문가들의 혼합물은 
+다음과 같이 만들어질 수 있습니다:
 ```lua
 experts = nn.ConcatTable()
 for i = 1, n do
@@ -585,7 +598,7 @@ moe = nn.Sequential()
 moe:add(trunk)
 moe:add(nn.MixtureTable())
 ```
-Forwarding a batch of 2 examples gives us something like this:
+두 예제로 구성된 배치 하나를 포워딩하면 다음과 같이 출력합니다:
 ```lua
 > =moe:forward(torch.randn(2, 3))
 -0.2152  0.3141  0.3280 -0.3772  0.2284
@@ -593,9 +606,8 @@ Forwarding a batch of 2 examples gives us something like this:
 [torch.DoubleTensor of dimension 2x5]
 ```
 
-Example 2:
-In the following, the `MixtureTable` expects `experts` to be a `Tensor` of
-`size = {1, 4, 2, 5, n}`:
+예 2:
+다음에서, `MixtureTable`은 `experts`로 `size = {1, 4, 2, 5, n}`인 `텐서` 하나를 기대합니다:
 ```lua
 experts = nn.Concat(5)
 for i = 1, n do
@@ -622,7 +634,7 @@ moe = nn.Sequential()
 moe:add(trunk)
 moe:add(nn.MixtureTable(5))
 ```
-Forwarding a batch of 2 examples gives us something like this:
+두 예제로 구성된 배치 하나를 포워딩하면 다음과 같이 출력합니다:
 ```lua
 > =moe:forward(torch.randn(2, 3)):size()
  2
@@ -638,13 +650,20 @@ Forwarding a batch of 2 examples gives us something like this:
 
 `module` = `SelectTable(index)`
 
-Creates a module that takes a `table` as input and outputs the element at index `index` (positive or negative). 
-This can be either a `table` or a [`Tensor`](https://github.com/torch/torch7/blob/master/doc/tensor.md#tensor).
+`테이블` 하나를 입력으로 받아서 인덱스 `index`(양수 또는 음수)에 있는 요소를 출력하는 
+모듈 하나를 만듭니다.
+이것은 `테이블` 하나 또는 `텐서` 하나일 수 있습니다.
 
-The gradients of the non-`index` elements are zeroed `Tensor`s of the same size. This is true regardless of the
-depth of the encapsulated `Tensor` as the function used internally to do so is recursive.
+비-`index` 요소들의 기울기들은 같은 차원을 가진 `0`으로 초기화된 `텐서`들입니다.
+이것은 함수로서 캡슐화된 `텐서`의 깊이에 상관없이 사실입니다.
+그렇게 하기 위해 내부적으로 사용된
+는 반복적입니다.
 
-Example 1:
+The gradients of the non-`index` elements are zeroed `Tensor`s of the same size. 
+This is true regardless of the depth of the encapsulated `Tensor` as the function 
+used internally to do so is recursive.
+
+예 1:
 ```lua
 > input = {torch.randn(2, 3), torch.randn(2, 1)}
 > =nn.SelectTable(1):forward(input)
@@ -668,7 +687,7 @@ Example 1:
 
 ```
 
-Example 2:
+예 2:
 ```lua
 > input = {torch.randn(2, 3), {torch.randn(2, 1), {torch.randn(2, 2)}}}
 
