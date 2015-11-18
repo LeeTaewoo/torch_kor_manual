@@ -2,6 +2,8 @@
 <a name="nn.dok"></a>
 # 신경망 패키지 #
 
+원문: [https://github.com/torch/nn/blob/master/README.md]("https://github.com/torch/nn/blob/master/README.md")
+
 이 패키지는 단순 또는 복잡한 신경망을 [토치](https://github.com/torch/torch7/blob/master/README.md)로 건설(build)하고 훈련하기 위한 쉽고 모듈적인 방법을 제공합니다.
   
   * 모듈은 신경망을 건설하는 데 사용되는 벽돌입니다. 각 모듈은 그 자신이 신경망입니다. 그러나 각 모듈은 다른 신경망들과 복잡한 신경망을 만들기 위해 컨테이너를 사용하여 결합될 수 있습니다: 
