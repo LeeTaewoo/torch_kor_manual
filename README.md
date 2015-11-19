@@ -1,6 +1,6 @@
 # 토치(Torch) 한국어 사용 설명서
 
-이 프로젝트는 [토치](https://github.com/torch)의 매뉴얼들을 한국어로 정리하기 위해 만들어졌습니다. 
+이 프로젝트는 [토치](https://github.com/torch)의 사용 설명서들을 한국어로 정리하기 위해 만들어졌습니다. 
 이 프로젝트는 누구에게나 열려있습니다.
 
 더 많은 예제는 [토치 컨닝 쪽지](https://github.com/torch/torch7/wiki/Cheatsheet)를 참고해 주십시오. 
