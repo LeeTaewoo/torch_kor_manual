@@ -863,34 +863,35 @@ print(mlp_l2:forward({x, y}))
 -- 우리가 관심있는 네트워크가 하나 있다고 합시다. 그 네트워크를 "p1_mlp"라 부르겠습니다.
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5, 2))
 
--- But we want to push examples towards or away from each other
--- so we make another copy of it called p2_mlp
--- this *shares* the same weights via the set command, but has its own set of temporary gradient storage
--- that's why we create it again (so that the gradients of the pair don't wipe each other)
+-- 그러나 우리는 예제들을 서로 달라붙거나 떨어지게 만들고 싶습니다.
+-- 그래서 우리는 그것의 또다른 복사본을 만듭니다. 그 복사본을 p2_mlp라 합시다.
+-- p2_mlp는 set 명령어를 통해 같은 가중치들을 *공유합니다*. 
+-- 그러나 p2_mlp는 그 자신만의 임시 기울기 스토리지의 집합을 가집니다.
+-- 그것이 우리가 p2_mlp를 다시 만든 이유입니다 (서로 기울기를 지우지 않게 하려고)
 p2_mlp= nn.Sequential(); p2_mlp:add(nn.Linear(5, 2))
 p2_mlp:get(1).weight:set(p1_mlp:get(1).weight)
 p2_mlp:get(1).bias:set(p1_mlp:get(1).bias)
 
--- we make a parallel table that takes a pair of examples as input. they both go through the same (cloned) mlp
+-- 우리는 한 쌍의 예제를 입력으로 받는 병렬 테이블 하나를 만듭니다. 그 예제들을 같은 (복제된) mlp를 통과합니다.
 prl = nn.ParallelTable()
 prl:add(p1_mlp)
 prl:add(p2_mlp)
 
--- now we define our top level network that takes this parallel table and computes the pairwise distance betweem
--- the pair of outputs
+-- 이제 우리는 이 병렬 테이블을 입력으로 받는 최상위 네트워크를 정의합니다,
+-- 그리고 출력들의 쌍 사이 요소별 거리를 계산합니다.
 mlp= nn.Sequential()
 mlp:add(prl)
 mlp:add(nn.PairwiseDistance(1))
 
--- and a criterion for pushing together or pulling apart pairs
+-- 그리고 쌍(pair)들을 모으거나 갈라놓기 위한 오차 판정 기준
 crit = nn.HingeEmbeddingCriterion(1)
 
--- lets make two example vectors
+-- 두 예제 벡터를 만듭시다
 x = torch.rand(5)
 y = torch.rand(5)
 
 
--- Use a typical generic gradient update function
+-- 보통의 일반적인 기울기 갱신 함수를 사용합니다.
 function gradUpdate(mlp, x, y, criterion, learningRate)
 local pred = mlp:forward(x)
 local err = criterion:forward(pred, y)
@@ -900,48 +901,46 @@ mlp:backward(x, gradCriterion)
 mlp:updateParameters(learningRate)
 end
 
--- push the pair x and y together, notice how then the distance between them given
--- by  print(mlp:forward({x, y})[1]) gets smaller
+-- 쌍 x와 y를 함께 넣습니다, 그런 다음 print(mlp:forward({x, y})[1])로 주어진 
+-- 쌍 x와 y 사이 거리가 어떻게 작아지는지에 주목하십시오.
 for i = 1, 10 do
 gradUpdate(mlp, {x, y}, 1, crit, 0.01)
 print(mlp:forward({x, y})[1])
 end
 
 
--- pull apart the pair x and y, notice how then the distance between them given
--- by  print(mlp:forward({x, y})[1]) gets larger
-
+-- 쌍 x와 y를 갈라놓습니다, 그런 다음 print(mlp:forward({x, y})[1])로 주어진
+-- 쌍 x와 y 사이 거리가 어떻게 커지는지에 주목하십시오.
 for i = 1, 10 do
 gradUpdate(mlp, {x, y}, -1, crit, 0.01)
 print(mlp:forward({x, y})[1])
 end
-
 ```
 
 <a name="nn.DotProduct"></a>
 ## DotProduct ##
 
-`module` = `DotProduct()` creates a module that takes a `table` of two vectors as input and outputs the dot product between them.
+`module` = `DotProduct()`은 두 벡터로 구성된 `테이블` 하나를 입력으로 받고, 그 두 벡터 사이 점곱(dot product)을 출력하는
+모듈 하나를 만듭니다.
 
-Example:
+예:
 ```lua
 mlp = nn.DotProduct()
 x = torch.Tensor({1, 2, 3})
 y = torch.Tensor({4, 5, 6})
 print(mlp:forward({x, y}))
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
  32
 [torch.Tensor of dimension 1]
 ```
 
 
-A more complicated example:
+더 복잡한 예:
 ```lua
-
--- Train a ranking function so that mlp:forward({x, y}, {x, z}) returns a number
--- which indicates whether x is better matched with y or z (larger score = better match), or vice versa.
+-- mlp:forward({x, y}, {x, z})가 한 숫자를 리턴하도록 랭킹 함수 하나를 훈련시킵니다 
+-- 그 숫자는 x가 y 또는 z 중 어느 쪽과 더 비슷한지(matched)를 가리킵니다 (더 큰 점수일수록 더 비슷한 것입니다).
 
 mlp1 = nn.Linear(5, 10)
 mlp2 = mlp1:clone('weight', 'bias')
@@ -973,7 +972,7 @@ print(mlp1:forward{y, y})
 
 crit = nn.MarginRankingCriterion(1);
 
--- Use a typical generic gradient update function
+-- 보통의 일반적 기울기 갱신 함수를 사용합니다.
 function gradUpdate(mlp, x, y, criterion, learningRate)
    local pred = mlp:forward(x)
    local err = criterion:forward(pred, y)
@@ -987,7 +986,7 @@ inp = {{x, y}, {x, z}}
 
 math.randomseed(1)
 
--- make the pair x and y have a larger dot product than x and z
+-- 쌍 x와 y가 쌍 x와 z보다 더 큰 점곱(dot product)을 가지도록 만듭니다.
 
 for i = 1, 100 do
    gradUpdate(mlp, inp, 1, crit, 0.05)
@@ -999,7 +998,7 @@ end
 
 print "________________**"
 
--- make the pair x and z have a larger dot product than x and y
+-- 쌍 x와 z가 쌍 x와 y보다 더 큰 점곱(dot product)을 가지도록 만듭니다.
 
 for i = 1, 100 do
    gradUpdate(mlp, inp, -1, crit, 0.05)
@@ -1014,63 +1013,65 @@ end
 <a name="nn.CosineDistance"></a>
 ## CosineDistance ##
 
-`module` = `CosineDistance()` creates a module that takes a `table` of two vectors (or matrices if in batch mode) as input and outputs the cosine distance between them.
+`module` = `CosineDistance()`은 두 벡터(또는 만약 배치 모드이면 행렬들)로 구성된 `테이블` 하나를 입력으로 받고,
+그 두 벡터 사이 코사인 거리를 출력하는 모듈 하나를 만듭니다.
 
-Examples:
+예:
 ```lua
 mlp = nn.CosineDistance()
 x = torch.Tensor({1, 2, 3})
 y = torch.Tensor({4, 5, 6})
 print(mlp:forward({x, y}))
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
  0.9746
 [torch.Tensor of dimension 1]
 ```
-`CosineDistance` also accepts batches:
+`CosineDistance`는 입력으로 배치(batches)들도 받습니다:
 ```lua
 mlp = nn.CosineDistance()
 x = torch.Tensor({{1,2,3},{1,2,-3}})
 y = torch.Tensor({{4,5,6},{-4,5,6}})
 print(mlp:forward({x,y}))
 ```
-gives the output:
+는 다음을 출력합니다:
 ```lua
  0.9746
 -0.3655
 [torch.DoubleTensor of size 2]
 ```
 
-A more complicated example:
+더 복잡한 예:
 ```lua
 
--- imagine we have one network we are interested in, it is called "p1_mlp"
+-- 우리가 관심있는 네트워크가 하나 있다고 합시다. 그 네트워크를 "p1_mlp"라 부르겠습니다.
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5, 2))
 
--- But we want to push examples towards or away from each other
--- so we make another copy of it called p2_mlp
--- this *shares* the same weights via the set command, but has its own set of temporary gradient storage
--- that's why we create it again (so that the gradients of the pair don't wipe each other)
+-- 그러나 우리는 예제들을 서로 달라붙거나 떨어지게 만들고 싶습니다.
+-- 그래서 우리는 그것의 또다른 복사본을 만듭니다. 그 복사본을 p2_mlp라 합시다.
+-- p2_mlp는 set 명령어를 통해 같은 가중치들을 *공유합니다*. 
+-- 그러나 p2_mlp는 그 자신만의 임시 기울기 스토리지의 집합을 가집니다.
+-- 그것이 우리가 p2_mlp를 다시 만든 이유입니다 (서로 기울기를 지우지 않게 하려고)
 p2_mlp= p1_mlp:clone('weight', 'bias')
 
--- we make a parallel table that takes a pair of examples as input. they both go through the same (cloned) mlp
+-- 우리는 한 쌍의 예제를 입력으로 받는 병렬 테이블 하나를 만듭니다. 그 예제들을 같은 (복제된) mlp를 통과합니다.
 prl = nn.ParallelTable()
 prl:add(p1_mlp)
 prl:add(p2_mlp)
 
--- now we define our top level network that takes this parallel table and computes the cosine distance betweem
--- the pair of outputs
+-- 이제 우리는 이 병렬 테이블을 입력으로 받는 최상위 네트워크를 정의합니다,
+-- 그리고 출력들의 쌍 사이 코사인 거리를 계산합니다.
 mlp= nn.Sequential()
 mlp:add(prl)
 mlp:add(nn.CosineDistance())
 
 
--- lets make two example vectors
+-- 두 예제 벡터를 만듭시다.
 x = torch.rand(5)
 y = torch.rand(5)
 
--- Grad update function..
+-- 기울기 갱신 함수...
 function gradUpdate(mlp, x, y, learningRate)
     local pred = mlp:forward(x)
     if pred[1]*y < 1 then
@@ -1081,15 +1082,14 @@ function gradUpdate(mlp, x, y, learningRate)
     end
 end
 
--- push the pair x and y together, the distance should get larger..
+-- 쌍 x와 y를 함께 넣습니다, 거리는 더 커져야 합니다...
 for i = 1, 1000 do
  gradUpdate(mlp, {x, y}, 1, 0.1)
  if ((i%100)==0) then print(mlp:forward({x, y})[1]);end
 end
 
 
--- pull apart the pair x and y, the distance should get smaller..
-
+-- 쌍 x와 y를 갈라놓습니다, 거리는 더 작아져야 합니다...
 for i = 1, 1000 do
  gradUpdate(mlp, {x, y}, -1, 0.1)
  if ((i%100)==0) then print(mlp:forward({x, y})[1]);end
@@ -1103,10 +1103,10 @@ end
 
 `module` = `CriterionTable(criterion)`
 
-Creates a module 
-that wraps a Criterion module so that it can accept a `table` of inputs. 
-Typically the `table` would contain two elements: 
-the input and output `x` and `y` that the Criterion compares.
+입력들의 `테이블` 하나를 받을 수 있게 하려고, 오차 판정 기준(criterion) 모듈 코드를 수정한(wrap)
+모듈 하나를 만듭니다.
+보통 그 `테이블`은 두 요소를 담고 있습니다.
+입력 `x`와 오차 판정 기준에서 비교에 사용되는 출력 `y`가 그것입니다.
 
 예:
 ```lua
