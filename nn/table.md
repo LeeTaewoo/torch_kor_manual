@@ -655,13 +655,8 @@ moe:add(nn.MixtureTable(5))
 이것은 `테이블` 하나 또는 `텐서` 하나일 수 있습니다.
 
 비-`index` 요소들의 기울기들은 같은 차원을 가진 `0`으로 초기화된 `텐서`들입니다.
-이것은 함수로서 캡슐화된 `텐서`의 깊이에 상관없이 사실입니다.
-그렇게 하기 위해 내부적으로 사용된
-는 반복적입니다.
-
-The gradients of the non-`index` elements are zeroed `Tensor`s of the same size. 
-This is true regardless of the depth of the encapsulated `Tensor` as the function 
-used internally to do so is recursive.
+이것은 캡슐화된 텐서의 깊이에 상관없이 사실입니다, 
+왜냐하면 그렇게 하는 내부적으로 사용된 함수는 반복적이기 때문입니다.
 
 예 1:
 ```lua
@@ -756,10 +751,8 @@ used internally to do so is recursive.
 하나일 수 있습니다.
 
 하위테이블에 포함되지 않은 요소들의 기울기들은 같은 차원의 `0`으로 초기화된 `텐서`들입니다.
-[~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]
-The gradients of the elements not included in the subtable are zeroed `Tensor`s of the same size. 
-This is true regardless of the dept of the encapsulated `Tensor` as the function used internally 
-to do so is recursive.
+이것은 캡슐화된 텐서의 깊이에 상관없이 사실입니다, 
+왜냐하면 그렇게 하는 내부적으로 사용된 함수는 반복적이기 때문입니다.
 
 예:
 ```lua
