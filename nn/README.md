@@ -10,7 +10,7 @@
     * [모듈](module.md#nn.Module) : 모든 모듈들에 의해 상속되는 추상 클래스;
     * [컨테이너](containers.md#nn.Containers) : [Sequential](containers.md#nn.Sequential), [Parallel](containers.md#nn.Parallel), 그리고 [Concat](containers.md#nn.Concat) 같은 컨테이너 클래스들;
     * [전달 함수](transfer.md#nn.transfer.dok) : [Tanh](transfer.md#nn.Tanh)와 [Sigmoid](transfer.md#nn.Sigmoid) 같은 비선형 함수들;
-    * [단순한 층](simple.md#nn.simplelayers.dok) : [Linear](simple.md#nn.Linear), [Mean](simple.md#nn.Mean), [Max](simple.md#nn.Max), 그리고 [Reshape](simple.md#nn.Reshape) 같은; 
+    * [단순 층](simple.md#nn.simplelayers.dok) : [Linear](simple.md#nn.Linear), [Mean](simple.md#nn.Mean), [Max](simple.md#nn.Max), 그리고 [Reshape](simple.md#nn.Reshape) 같은; 
     * [테이블 층](table.md#nn.TableLayers) : [SplitTable](table.md#nn.SplitTable), [ConcatTable](table.md#nn.ConcatTable), 그리고 [JoinTable](table.md#nn.JoinTable) 같은 테이블 조작을 위한 층들;
     * [컨볼루션 층](convolution.md#nn.convlayers.dok) : [Temporal](convolution.md#nn.TemporalModules),  [Spatial](convolution.md#nn.SpatialModules), 그리고 [Volumetric](convolution.md#nn.VolumetricModules) 컨볼루션들; 
   * 오차 판정 기준(Criterion)은 주어진 입력과 타겟의 주어진 손실 함수에 따른 기울기를 계산합니다:
