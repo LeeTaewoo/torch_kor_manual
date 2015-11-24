@@ -1,75 +1,72 @@
 <a name="nn.traningneuralnet.dok"></a>
 # 신경망 훈련하기 #
 
-Training a neural network is easy with a [simple `for` loop](#nn.DoItYourself).
-While doing your own loop provides great flexibility, you might
-want sometimes a quick way of training neural
-networks. [StochasticGradient](#nn.StochasticGradient), a simple class
-which does the job for you is provided as standard.
+신경망은 [간단한 `for` 루프](#nn.DoItYourself)로도 쉽게 훈련시킬 수 있습니다.
+직접 구현하는 것은 그 내용을 자유롭게 바꿀 수 있다는 장점이 있습니다.
+그러나 가끔 우리는 신경망을 빨리 훈련시키는 방법을 원할 지도 모릅니다.
+당신을 위해 그 일을 하는 단순 클래스 [StochasticGradient](#nn.StochasticGradient)가 표준으로 제공됩니다.
 
 <a name="nn.StochasticGradient.dok"></a>
-## StochasticGradient ##
+## StochasticGradient (통계적 기울기) ##
 
-`StochasticGradient` is a high-level class for training [neural networks](#nn.Module), using a stochastic gradient
-algorithm. This class is [serializable](https://github.com/torch/torch7/blob/master/doc/serialization.md#serialization).
+`StochasticGradient`는 통계적 기울기 알고리즘을 사용하는 [neural networks](#nn.Module) 훈련을 위한 고수준 클래스입니다. 
+이 클래스는 [직렬화](https://github.com/torch/torch7/blob/master/doc/serialization.md#serialization)할 수 있습니다.
 
 <a name="nn.StochasticGradient"></a>
 ### StochasticGradient(module, criterion) ###
 
-Create a `StochasticGradient` class, using the given [Module](module.md#nn.Module) and [Criterion](criterion.md#nn.Criterion).
-The class contains [several parameters](#nn.StochasticGradientParameters) you might want to set after initialization.
+주어진 [Module](module.md#nn.Module)과 [Criterion](criterion.md#nn.Criterion)을 사용하여 `StochasticGradient` 클래스 하나를 만듭니다.
+그 클래스는 당신이 초기화 뒤에 설정하기 원할지도 모르는 [몇 개의 파라미터들](#nn.StochasticGradientParameters)을 가집니다. 
 
 <a name="nn.StochasticGradientTrain"></a>
 ### train(dataset) ###
 
-Train the module and criterion given in the
-[constructor](#nn.StochasticGradient) over `dataset`, using the
-internal [parameters](#nn.StochasticGradientParameters).
+오차 판정 기준(criterion)과 모듈은 [생성자](#nn.StochasticGradient)로 주어진 것을 사용합니다.
+내부 [파라미터들](#nn.StochasticGradientParameters)을 사용하여, `dataset`에 대해 모듈을 훈련시킵니다.
 
-StochasticGradient expect as a `dataset` an object which implements the operator
-`dataset[index]` and implements the method `dataset:size()`. The `size()` methods
-returns the number of examples and `dataset[i]` has to return the i-th example.
+`StochasticGradient`는 `dataset`으로 한 객체를 기대합니다. 
+그 객체는 `dataset[index]` 연산자를 구현하고 `dataset:size()` 메소드를 구현합니다.
+`size()` 메소드들은 예제들의 개수를 리턴하고 `dataset[i]`는 `i` 번째 예제를 리턴해야 합니다.
 
-An `example` has to be an object which implements the operator
-`example[field]`, where `field` might take the value `1` (input features)
-or `2` (corresponding label which will be given to the criterion). 
-The input is usually a Tensor (except if you use special kind of gradient modules,
-like [table layers](table.md#nn.TableLayers)). The label type depends of the criterion.
-For example, the [MSECriterion](criterion.md#nn.MSECriterion) expects a Tensor, but the
-[ClassNLLCriterion](criterion.md#nn.ClassNLLCriterion) except a integer number (the class).
+`예제` 하나는 한 객체여야 합니다. 그 객체는 연산자 `example[field]`를 구현합니다.
+여기서 `field`는 값 `1`(입력 특징들) 또는 `2`(오차 판정 기준에 주어지는 상응하는 레이블)
+을 받을 수도 있습니다.
+([table layers](table.md#nn.TableLayers)처럼 특별한 종류의 기울기 모듈들을 사용하는 경우를 제외하면) 입력은 보통 텐서 하나입니다.
+레이블 타입은 오차 판정 기준에 의존적입니다. 
+예를 들어, [MSECriterion](criterion.md#nn.MSECriterion)은 텐서 하나를 기대하지만,
+[ClassNLLCriterion](criterion.md#nn.ClassNLLCriterion)은 정수 숫자 (부류) 하나를 기대합니다.
 
-Such a dataset is easily constructed by using Lua tables, but it could any `C` object
-for example, as long as required operators/methods are implemented. 
-[See an example](#nn.DoItStochasticGradient).
+그런 데이터세트는 루아 테이블을 사용하여 쉽게 만들어집니다. 
+그러나 데이트세트는 요구되는 연산자/메소드가 구현되기만 하면, 어떤 `C` 객체일 수도 있습니다. 
+[예제를 보십시오](#nn.DoItStochasticGradient).
 
 <a name="nn.StochasticGradientParameters"></a>
-### Parameters ###
+### 파라미터들 ###
 
-`StochasticGradient` has several field which have an impact on a call to [train()](#nn.StochasticGradientTrain).
+`StochasticGradient`는 [train()](#nn.StochasticGradientTrain)을 호출하는 데 영향을 끼치는 몇 가지 필드들을 가집니다.
 
-  * `learningRate`: This is the learning rate used during training. The update of the parameters will be `parameters = parameters - learningRate * parameters_gradient`. Default value is `0.01`.
-  * `learningRateDecay`: The learning rate decay. If non-zero, the learning rate (note: the field learningRate will not change value) will be computed after each iteration (pass over the dataset) with: `current_learning_rate =learningRate / (1 + iteration * learningRateDecay)`
-  * `maxIteration`: The maximum number of iteration (passes over the dataset). Default is `25`.
-  * `shuffleIndices`: Boolean which says if the examples will be randomly sampled or not. Default is `true`. If `false`, the examples will be taken in the order of the dataset.
-  * `hookExample`: A possible hook function which will be called (if non-nil) during training after each example forwarded and backwarded through the network. The function takes `(self, example)` as parameters. Default is `nil`.
-  * `hookIteration`: A possible hook function which will be called (if non-nil) during training after a complete pass over the dataset. The function takes `(self, iteration)` as parameters. Default is `nil`.
+  * `learningRate (학습률)`: 이것은 훈련시키는 동안 사용되는 학습률입니다. 파라미터들의 갱신은 `parameters = parameters - learningRate * parameters_gradient`일 것입니다. 기본값은 `0.01`입니다.
+  * `learningRateDecay (학습률 쇠퇴)`: 학습률 쇠퇴(점점 줄어들어 사라짐). 만약 0이 아니면, 학습률(노트: 필드 학습률은 값을 바꾸지 않습니다)은 각 반복(그 데이터세트를 거쳐가는) 후에 다음 식으로 계산될 것입니다: `current_learning_rate =learningRate / (1 + iteration * learningRateDecay)`.
+  * `maxIteration`: 최대 반복 횟수 (그 데이터세트를 거쳐가는). 기본값은 `25`입니다.
+  * `shuffleIndices`: 예제들이 랜덤하게 샘플될 지 아닐지를 말하는 불리언 타입. 기본값은 `true`입니다. 만약 `false`이면, 예제들은 데이터세트에 있는 순서대로 읽힙니다.
+  * `hookExample`: 후크(hook) 함수. 이 함수는 (만약 nil이 아니면) 훈련 동안 각 예제가 네트워크에 포워드되고 백워드된 다음에 호출됩니다. 이 함수는 파라미터들로 `(self, example)`를 받습니다. 기본값은 'nil'입니다. 
+  * `hookIteration`: 후크(hook) 함수. 이 함수는 (만약 nil이 아니면) 훈련 동안 그 데이터세트를 완전히 한 번 거친 다음 호출됩니다. 이 함수는 파라미터들로 `(self, iteration)`을 받습니다. 기본값은 'nil'입니다. 
 
 <a name="nn.DoItStochasticGradient"></a>
-## Example of training using StochasticGradient ##
+## StochasticGradient을 사용한 훈련 예 ##
 
-We show an example here on a classical XOR problem.
+여기서, 우리는 고전적인 XOR 문제에 대한 예제를 보입니다.
 
-__Dataset__
+__데이터세트__
 
-We first need to create a dataset, following the conventions described in
-[StochasticGradient](#nn.StochasticGradientTrain).
+우리는 먼저 [StochasticGradient](#nn.StochasticGradientTrain)에 설명된 규약에 따라 데이터세트를 만들 필요가 있습니다. 
 ```lua
 dataset={};
-function dataset:size() return 100 end -- 100 examples
+function dataset:size() return 100 end -- 예제 100개
 for i=1,dataset:size() do 
-  local input = torch.randn(2);     -- normally distributed example in 2d
+  local input = torch.randn(2);     -- 2차원에서 정규 분포된 예제
   local output = torch.Tensor(1);
-  if input[1]*input[2]>0 then     -- calculate label for XOR function
+  if input[1]*input[2]>0 then       -- XOR 함수를 위한 레이블 계산
     output[1] = -1;
   else
     output[1] = 1
@@ -78,21 +75,21 @@ for i=1,dataset:size() do
 end
 ```
 
-__Neural Network__
+__신경망__
 
-We create a simple neural network with one hidden layer.
+우리는 숨겨진 층 하나를 가진 단순한 신경망 하나를 만듭니다.
 ```lua
 require "nn"
-mlp = nn.Sequential();  -- make a multi-layer perceptron
-inputs = 2; outputs = 1; HUs = 20; -- parameters
+mlp = nn.Sequential();  -- 다층 퍼셉트론 하나를 만듭니다
+inputs = 2; outputs = 1; HUs = 20; -- 파라미터들
 mlp:add(nn.Linear(inputs, HUs))
 mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
 ```
 
-__Training__
+__훈련__
 
-We choose the Mean Squared Error criterion and train the beast.
+우리는 평균 제곱 오차 판정 기준으로 선택하고 그 데이터세트를 훈련시킵니다.
 ```lua
 criterion = nn.MSECriterion()  
 trainer = nn.StochasticGradient(mlp, criterion)
@@ -100,7 +97,7 @@ trainer.learningRate = 0.01
 trainer:train(dataset)
 ```
 
-__Test the network__
+__네트워크 시험__
 
 ```lua
 x = torch.Tensor(2)
@@ -110,7 +107,7 @@ x[1] = -0.5; x[2] =  0.5; print(mlp:forward(x))
 x[1] = -0.5; x[2] = -0.5; print(mlp:forward(x))
 ```
 
-You should see something like:
+다음과 같이 나와야 합니다:
 ```lua
 > x = torch.Tensor(2)
 > x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
@@ -135,58 +132,58 @@ You should see something like:
 ```
 
 <a name="nn.DoItYourself"></a>
-## Example of manual training of a neural network ##
+## 신경망을 직접 짠 코드로 훈련시키는 예 ##
 
-We show an example here on a classical XOR problem.
+여기서, 우리는 고전적인 XOR 문제에 대한 예를 보입니다.
 
-__Neural Network__
+__신경망__
 
-We create a simple neural network with one hidden layer.
+우리는 숨겨진 층 하나를 가진 단순한 신경망 하나를 만듭니다.
 ```lua
 require "nn"
-mlp = nn.Sequential();  -- make a multi-layer perceptron
-inputs = 2; outputs = 1; HUs = 20; -- parameters
+mlp = nn.Sequential();  -- 다층 퍼셉트론 하나를 만듭니다
+inputs = 2; outputs = 1; HUs = 20; -- 파라미터들
 mlp:add(nn.Linear(inputs, HUs))
 mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
 ```
 
-__Loss function__
+__손실 함수__
 
-We choose the Mean Squared Error criterion.
+평균 제곱 오차 판정 기준을 선택합니다.
 ```lua
 criterion = nn.MSECriterion()  
 ```
 
-__Training__
+__훈련__
 
-We create data _on the fly_ and feed it to the neural network.
+우리는 데이터를 _즉석에서_ 만들고 그것을 신경망에 넣습니다.
 
 ```lua
 for i = 1,2500 do
-  -- random sample
-  local input= torch.randn(2);     -- normally distributed example in 2d
+  -- 랜덤 샘플
+  local input= torch.randn(2);    -- 2차원에서 정규 분포된 예제
   local output= torch.Tensor(1);
-  if input[1]*input[2] > 0 then  -- calculate label for XOR function
+  if input[1]*input[2] > 0 then  -- XOR 함수를 위한 레이블 계산
     output[1] = -1
   else
     output[1] = 1
   end
 
-  -- feed it to the neural network and the criterion
+  -- 그것을 신경망에 넣습니다. 그리고 오차 판정 기준
   criterion:forward(mlp:forward(input), output)
 
-  -- train over this example in 3 steps
-  -- (1) zero the accumulation of the gradients
+  -- 이 예제에 대해 3 단계로 훈련 시킵니다
+  -- (1) 기울기들의 누적을 0으로 초기화합니다
   mlp:zeroGradParameters()
-  -- (2) accumulate gradients
+  -- (2) 기울기들을 누적합니다
   mlp:backward(input, criterion:backward(mlp.output, output))
-  -- (3) update parameters with a 0.01 learning rate
+  -- (3) 학습률 0.01로 파라미터들을 갱신합니다
   mlp:updateParameters(0.01)
 end
 ```
 
-__Test the network__
+__네트워크 시험__
 
 ```lua
 x = torch.Tensor(2)
@@ -196,7 +193,7 @@ x[1] = -0.5; x[2] =  0.5; print(mlp:forward(x))
 x[1] = -0.5; x[2] = -0.5; print(mlp:forward(x))
 ```
 
-You should see something like:
+다음과 같이 나와야 합니다:
 ```lua
 > x = torch.Tensor(2)
 > x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
