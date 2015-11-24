@@ -7,6 +7,8 @@
 우리의 대화창에 많은 양의 텍스트를 포스팅하거나 설치에 대해 묻는 것은 피해주십시오.
 대신 그런 이슈들을 우리의 구글 그룹스 메일링 목록에서 다뤄주신다면 우리에게 큰 도움이 될 것입니다. :)
 
+원문: [https://github.com/torch](https://github.com/torch)
+
 <a name="torch.reference.dok"/>
 # 토치 패키지 참조 매뉴얼 #
 
