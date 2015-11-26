@@ -1,1 +1,2 @@
-원문: [https://github.com/torch/tutorials/tree/master/5_newmodules](https://github.com/torch/tutorials/tree/master/5_newmodules)
+- 기트허브 원문 : [https://github.com/torch/tutorials/tree/master/5_newmodules](https://github.com/torch/tutorials/tree/master/5_newmodules)
+- [소스코드에 대한 한국어 설명](http://roboticist.tistory.com/590)
