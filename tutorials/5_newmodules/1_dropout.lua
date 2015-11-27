@@ -13,11 +13,13 @@ i = image.lena()
 -- 그 영상을 처리:
 result = n:forward(i)
 
--- 결과 출력:
-print('original image:')
-itorch.image(i)
-print('result image:')
-itorch.image(result)
+if itorch then
+  -- 결과 출력:
+  print('original image:')
+  itorch.image(i)
+  print('result image:')
+  itorch.image(result)
+end
 
 -- 약간의 통계:
 mse = i:dist(result)
