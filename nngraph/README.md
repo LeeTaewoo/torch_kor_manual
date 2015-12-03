@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/torch/nngraph.svg)](https://travis-ci.org/torch/nngraph) 
 
+원문: <https://github.com/torch/nngraph/>
+
 이 패키지는 [Torch](https://github.com/torch/torch7/blob/master/README.md)의 `nn` 라이브러리를 위한 그래픽적 계산을 제공합니다.
 
 ## 요구사항
