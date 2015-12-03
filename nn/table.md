@@ -438,7 +438,7 @@ module = JoinTable(dimension, nInputDims)
 ### 예 1
 
 ```lua
-
+x = torch.randn(5, 1)
 y = torch.randn(5, 1)
 z = torch.randn(2, 1)
 
