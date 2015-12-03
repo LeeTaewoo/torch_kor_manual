@@ -211,9 +211,7 @@ net.name = 'my_bad_linear_net'
 -- 에러가 생기도록 일부러 틀린 차원을 가진 입력 하나를 준비합니다.
 local input = torch.rand(11)
 pcall(function() net:updateOutput(input) end)
--- 이것은 에러를 만들고 한 그래프를 뱉었어야 합니다.
--- 그 svg를 디스플레이하기 위해 사파리를 실행합니다.
-os.execute('open -a  Safari my_bad_linear_net.svg')
+-- 이 명령은 에러를 만들고 그래프 하나를 출력합니다.
 ```
 <img src= "https://raw.github.com/koraykv/torch-nngraph/master/doc/my_bad_linear_net.png" width="300px"/>
 
