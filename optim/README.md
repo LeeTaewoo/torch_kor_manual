@@ -1,6 +1,8 @@
 # 최적화 패키지
 
-이 패키지는 [Torch](https://github.com/torch/torch7/blob/master/README.md)를 위한 몇 개의 최적화 루틴들을 담고 있습니다.
+원문: <https://github.com/torch/optim/>
+
+이 패키지는 [Torch](https://github.com/torch/torch7/blob/master/README.md)를 위한 몇 가지 최적화 루틴들을 담고 있습니다.
 각 최적화 알고리즘은 같은 인터페이스에 기반을 둡니다:
 
 ```lua

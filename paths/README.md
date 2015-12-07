@@ -1,7 +1,9 @@
 <a name="paths.dok"></a>
 # paths: 파일 이름 조작 패키지 #
 
-[이 패키지](https://github.com/torch/paths)는 그 파일 시스템을 조작할 수 있는 이식 가능한 함수 및 변수들을 제공합니다:
+원문: <https://github.com/torch/paths/>
+
+[이 패키지](https://github.com/torch/paths)는 파일 시스템을 조작할 수 있는 이식 가능한 함수 및 변수들을 제공합니다:
  
   * [파일 이름 조작](filenames.md) : 파일 이름을 조작하기 위한 함수들 ;
   * [디렉토리 함수](dirfunctions.md) : 디렉토리들을 열거하고 조작하기 위한 함수들 ;
