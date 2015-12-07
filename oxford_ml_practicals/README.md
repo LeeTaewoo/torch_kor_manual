@@ -2,12 +2,7 @@
 옥스포드 대학 기계 학습, 2015년 봄
 
 ## 실습 1
-토치(Torch) 설치 및 기본 사용법에 관한 것입니다. 다음 자료를 참고해 주십시오.
- 
-- [토치 설치 방법](https://docs.google.com/document/d/18sTMqVFDSFvNaz8xIo40Wm9XBSrMX8spTDGr4F0XXi8/edit#).
-- [루아 15분 안에 배우기](http://roboticist.tistory.com/576)
-- [텐서](https://docs.google.com/document/d/1QDtM8pdduWeUw0UK4zd7KgTuC6mFEbFCfVd3TF7Vj_Q/edit)
-- [수학 연산들](https://docs.google.com/document/d/1js0VjoZ4HzixMVQvx7Lxw75ORCi-kRFoNqNrqFcUuNQ/edit) 
+토치(Torch) 설치 및 기본 사용법에 대해 실습합니다. 
 
 ## 실습 2
 기울기, 기울기 하강, 통계적 기울기 하강, 선형 회귀, 최소 제곱법을 실습합니다.
@@ -22,7 +17,7 @@
 nngraph 패키지 사용법을 익힙니다. 복잡한 구조를 가진 신경망을 만들고 학습시키는 법을 실습합니다.
 
 ## 실습 6
-
+엘에스티엠을 이용한 문자 단위 언어 모델을 실습합니다.
 
 # 실습을 위한 코스 페이지
 <https://www.cs.ox.ac.uk/people/nando.defreitas/machinelearning/>
