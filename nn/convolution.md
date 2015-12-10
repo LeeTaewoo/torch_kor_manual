@@ -18,6 +18,7 @@
     * [SpatialFractionalMaxPooling (공간적 Fractional 맥스 풀링)](#nn.SpatialFractionalMaxPooling) : 한 입력 영상에 대한 2차원 fractional 맥스 풀링 연산 ;
     * [SpatialAveragePooling (공간적 평균 풀링)](#nn.SpatialAveragePooling) : 한 입력 영상에 대한 2차원 평균 풀링 연산 ;
     * [SpatialAdaptiveMaxPooling (공간적 적응 맥스 풀링)](#nn.SpatialAdaptiveMaxPooling) : 파라미터들을 역동적으로(dynamically) 고쳐나가는 고정 크기 출력을 가진 2차원 맥스 풀링 연산 ;
+    * [SpatialMaxUnpooling](#nn.SpatialMaxUnpooling) : 2차원 맥스-언풀링 연산 ;
     * [SpatialLPPooling (공간적 LP 풀링)](#nn.SpatialLPPooling) : 한 입력 영상들의 집합에서 컨볼루셔널 방식으로 `p` 놈을 계산합니다 ;
     * [SpatialConvolutionMap (공간적 컨볼루션 맵)](#nn.SpatialConvolutionMap) : 일반적 연결 테이블(generic connection table)을 사용하는 2차원 컨볼루션 ;
     * [SpatialZeroPadding (공간적 영 채우기)](#nn.SpatialZeroPadding) : 특정된 개수의 `0`들로 한 특징 맵(feature map)을 채움 ;
@@ -556,6 +557,28 @@ x_j_end   = ceil(((j+1)/owidth)  * iwidth)
 y_i_start = floor((i   /oheight) * iheight)
 y_i_end   = ceil(((i+1)/oheight) * iheight)
 ```
+
+<a name="nn.SpatialMaxUnpooling"></a>
+### SpatialMaxUnpooling ###
+
+```lua
+module = nn.SpatialMaxUnpooling(poolingModule)
+```
+
+이전에 SpatialMaxPooling 모듈 `poolingModule`로 계산된 인덱스들을 
+사용하여 2차원 "max-unpooling" 연산을 적용.
+
+`B = poolingModule:forward(A)`가 호출될 때, 
+최댓값들(각 맵 안에서 그들의 위치에 상응하는)의 인덱스들이 저장됩니다:
+`B[{n,k,i,j}] = A[{n,k,indices[{n,k,i}],indices[{n,k,j}]}]`.
+만약 `C`가 `B`와 같은 크기의 텐서 하나이면, 
+`module:updateOutput(C)`는 `A`와 같은 크기의 텐서 `D`를 출력합니다: 
+`D[{n,k,indices[{n,k,i}],indices[{n,k,j}]}] = C[{n,k,i,j}]`.
+
+참고 자료:
+   "Visualizing and understanding convolutional networks" (2014)
+                   by Matthew Zeiler, Rob Fergus
+
 
 <a name="nn.SpatialSubSampling"></a>
 ### SpatialSubSampling (공간적 서브샘플링) ###
